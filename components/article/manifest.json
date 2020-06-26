@@ -1,6 +1,6 @@
 {
   "name": "article",
-  "version": "0.1",
+  "version": "0.2",
   "type": "module",
   "class": "workspace\\modules\\article\\Article",
   "description": "article module",
