@@ -1,0 +1,11 @@
+{
+  "name": "categories",
+  "version": "0.2",
+  "type": "module",
+  "class": "workspace\\modules\\categories\\Categories",
+  "description": "categories module",
+  "configFile": "config/categories.php",
+  "routFile": "routing/rout.php",
+  "migrationPath": "console/migrations",
+  "relations": []
+}

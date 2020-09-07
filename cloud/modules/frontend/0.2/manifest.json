@@ -1,0 +1,24 @@
+{
+  "name": "frontend",
+  "version": "0.2",
+  "type": "module",
+  "class": "workspace\\modules\\frontend\\Frontend",
+  "description": "frontend module",
+  "configFile": "config/frontend.php",
+  "routFile": "routing/rout.php",
+  "migrationPath": "console/migrations",
+  "relations": [
+    {
+      "name": "article",
+      "version": "0.2"
+    },
+    {
+      "name": "categories",
+      "version": "0.2"
+    },
+    {
+      "name": "settings",
+      "version": "0.2"
+    }
+  ]
+}

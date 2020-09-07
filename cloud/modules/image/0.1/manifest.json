@@ -1,0 +1,11 @@
+{
+  "name": "image",
+  "version": "0.1",
+  "type": "module",
+  "class": "workspace\\modules\\image\\Image",
+  "description": "image module",
+  "configFile": "config/image.php",
+  "routFile": "routing/rout.php",
+  "migrationPath": "console/migrations",
+  "relations": []
+}
