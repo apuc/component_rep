@@ -12,7 +12,7 @@ return [
     ],
     'component_manager' => [
         'repType' => '\\core\\component_manager\\lib\\CurlRep',
-        'url' => 'http://cg.loc',
+        'url' => '',
         'modulePath' => '/workspace/modules/',
     ]
 ];

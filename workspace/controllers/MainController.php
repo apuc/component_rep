@@ -9,7 +9,10 @@ use core\component_manager\lib\CmService;
 use core\component_manager\lib\Mod;
 use core\component_manager\lib\RelationsHandler;
 use core\Controller;
+use core\Debug;
 use core\ModulesHandler;
+use Exception;
+use workspace\modules\modules\models\Modules;
 use workspace\modules\users\models\User;
 use workspace\requests\LoginRequest;
 use workspace\requests\RegistrationRequest;
@@ -116,6 +119,11 @@ class MainController extends Controller
         return json_encode(ModulesHandler::getModel());
     }
 
+    public function serverCore()
+    {
+        return json_encode((ModulesHandler::getCore()));
+    }
+
     public function createManifest()
     {
         file_put_contents('modules.json', json_encode(ModulesHandler::getModel()));
@@ -125,20 +133,15 @@ class MainController extends Controller
 
     public function save()
     {
-        $check_data = ModulesHandler::check();
+        $module = Modules::where('name', $_POST['slug'])->where('version', $_POST['version'])->first();
 
-        if ($check_data == 1) {
-            ModulesHandler::db(['manifest' => json_decode(ModulesHandler::getModule())], 'INSERT');
-            file_put_contents('test.txt', "INSERT");
-            return json_encode('1');
-        } elseif($check_data == 0) {
+        if (!isset($module)) {
+            ModulesHandler::write_to_db(json_decode(ModulesHandler::getModule()), 'INSERT');
+        } else {
             $mod = new Mod();
             $mod->deleteDirectory("cloud/modules/" . $_POST['slug'] . "/" . $_POST['version']);
-            ModulesHandler::db(['manifest' => json_decode(ModulesHandler::getModule())], 'UPDATE');
-            file_put_contents('test.txt', "UPDATE");
-            return json_encode('1');
-        } else
-            return json_encode('0');
+            ModulesHandler::write_to_db(json_decode(ModulesHandler::getModule()), 'UPDATE');
+        }
     }
 
     public function relations()

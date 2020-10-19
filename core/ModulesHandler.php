@@ -17,7 +17,7 @@ class ModulesHandler
         return (isset($module)) ? 0 : 1;
     }
 
-    public static function db($data, $action)
+    public static function write_to_db($data, $action)
     {
         switch ($action) {
             case 'INSERT':
@@ -25,22 +25,31 @@ class ModulesHandler
                 $module->__save($data);
                 break;
             case 'UPDATE':
-                $module = Modules::where('name', $data['manifest']->name)->where('version', $data['manifest']->version)->first();
+                $module = Modules::where('name', $data->name)->where('version', $data->version)->first();
                 $module->__save($data);
                 break;
         }
     }
 
+    public static function getCore()
+    {
+        return Modules::orderBy('name')->where('type', 'core')->get();
+    }
+
     public static function getModel()
     {
         $server_modules = [];
-        $modules = Modules::orderBy('name')->get();
-        foreach ($modules as $module)
+        $modules = Modules::orderBy('name')->where('type', 'module')->get();
+        foreach ($modules as $module) {
+            $manifest = json_decode(file_get_contents(ROOT_DIR . "/cloud/modules/".$module['name']."/".$module['version']."/manifest.json"));
+            $relations = (isset($manifest->relations)) ? $manifest->relations : '';
             array_push($server_modules,
-                new \workspace\classes\Modules($module->name, $module->version, $module->description, '', ''));
+                new \workspace\classes\Modules($module['name'], $module['version'], $module['description'], '', '',
+                    'module', $relations, $module['created_at'], $module['updated_at']));
+        }
 
         array_push($server_modules,
-            new \workspace\classes\Modules('', '', '', '', ''));
+            new \workspace\classes\Modules('', '', '', '', '', '', '', '', ''));
         $temp = $server_modules[0]->name;
 
         $model_arr = [];
@@ -55,8 +64,10 @@ class ModulesHandler
                 $model_arr = [];
             }
             array_push($model_arr,
-                new \workspace\classes\Modules($value->name, $value->version, $value->description, '', 'server'));
+                new \workspace\classes\Modules($value->name, $value->version, $value->description, '',
+                    'server', 'module', $value->relations, $value->created_at, $value->updated_at));
         }
+
         return $model;
     }
 
@@ -64,24 +75,27 @@ class ModulesHandler
     {
         $slug = $_POST['slug'];
         $version = $_POST['version'];
-        $filename = "$slug.zip";
         $modulesPath = "cloud/modules";
+
+        if (!file_exists("$modulesPath/$slug"))
+            mkdir("$modulesPath/$slug");
+        if (!file_exists("$modulesPath/$slug/$version"))
+            mkdir("$modulesPath/$slug/$version");
+        if (!file_exists("$modulesPath/$slug/$version/$slug"))
+            mkdir("$modulesPath/$slug/$version/$slug");
+
+        $file = base64_decode($_POST['file']);
+
+        file_put_contents(ROOT_DIR . "/$modulesPath/$slug/$version/$slug.zip", $file);
+
         $cm = new CmService();
+        $cm->unpack("/$modulesPath/$slug/$version/$slug.zip", "/$modulesPath/$slug/$version", $slug);
+
+        $manifest = file_get_contents(ROOT_DIR . "/$modulesPath/$slug/$version/$slug/manifest.json");
+        file_put_contents(ROOT_DIR . "/$modulesPath/$slug/$version/manifest.json", $manifest);
+
         $mod = new Mod();
-
-        mkdir("$modulesPath/$slug");
-        mkdir("$modulesPath/$slug/$version");
-        mkdir("$modulesPath/$slug/$version/$slug");
-
-        $file = file_get_contents($_POST['file']);
-        file_put_contents("$modulesPath/$slug/$version/$filename", $file);
-
-        $cm->unpack("/$modulesPath/$slug/$version/$filename", "/$modulesPath/$slug/$version", $slug);
-
-        $manifest = file_get_contents("$modulesPath/$slug/$version/$slug/manifest.json");
-        file_put_contents("$modulesPath/$slug/$version/manifest.json", $manifest);
-
-        $mod->deleteDirectory("$modulesPath/$slug/$version/$slug");
+        $mod->deleteDirectory(ROOT_DIR . "/$modulesPath/$slug/$version/$slug");
 
         return $manifest;
     }

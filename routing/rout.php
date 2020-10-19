@@ -11,6 +11,7 @@ App::$collector->any('check', ['workspace\controllers\MainController', 'check'])
 App::$collector->cors('save', ['workspace\controllers\MainController'], ['save']);
 App::$collector->cors('remote-sign-up', ['workspace\controllers\MainController'], ['remoteSignUp']);
 
+App::$collector->any('get-core', ['workspace\controllers\MainController', 'serverCore']);
 App::$collector->any('server-modules', ['workspace\controllers\MainController', 'serverModules']);
 App::$collector->any('create-manifest', ['workspace\controllers\MainController', 'createManifest']);
 

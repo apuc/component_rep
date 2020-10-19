@@ -13,6 +13,9 @@ class Modules
     public $type;
     public $status;
     public $localStatus;
+    public $relations;
+    public $created_at;
+    public $updated_at;
 
     /**
      * @param string $name
@@ -20,18 +23,28 @@ class Modules
      * @param string $description
      * @param string $status
      * @param string $localStatus
+     * @param string $type
+     * @param $relations
+     * @param string $created_at
+     * @param string $updated_at
      */
-    public function __construct($name, $version, $description, $status, $localStatus)
+    public function __construct(string $name, string $version, string $description, string $status, string $localStatus,
+                                string $type, $relations, string $created_at, string $updated_at)
     {
         $this->name = $name;
         $this->version = $version;
         $this->description = $description;
         $this->status = $status;
         $this->localStatus = $localStatus;
+        $this->type = $type;
+        $this->relations = $relations;
+        $this->created_at = $created_at;
+        $this->updated_at = $updated_at;
     }
 
     /**
      * @param ModulesSearchRequest $request
+     * @param array $modules
      * @return Collection
      */
     public static function search(ModulesSearchRequest $request, array $modules)
