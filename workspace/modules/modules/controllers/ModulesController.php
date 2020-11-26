@@ -5,7 +5,9 @@ namespace workspace\modules\modules\controllers;
 
 
 use core\App;
+use core\component_manager\lib\Mod;
 use core\Controller;
+use core\Debug;
 use workspace\modules\modules\models\Modules;
 use workspace\modules\modules\requests\ModulesSearchRequest;
 
@@ -22,6 +24,7 @@ class ModulesController extends Controller
     public function actionIndex()
     {
         $request = new ModulesSearchRequest();
+        $request->type = 'module';
         $model = Modules::search($request);
 
         $options = $this->setOptions();
@@ -63,7 +66,17 @@ class ModulesController extends Controller
 
     public function actionDelete()
     {
+        $module = Modules::where('id', $_POST['id'])->first();
+        $mod  = new Mod();
+        $name = $module->name;
+        $version = $module->version;
+        $mod->deleteDirectory("cloud/modules/$name/$version");
+
         Modules::where('id', $_POST['id'])->delete();
+
+        $other_modules = Modules::where('name', $name)->get();
+        if(empty($other_modules))
+            $mod->deleteDirectory("cloud/modules/$name");
     }
 
     public function setOptions()
