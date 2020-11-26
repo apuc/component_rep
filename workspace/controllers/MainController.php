@@ -133,14 +133,20 @@ class MainController extends Controller
 
     public function save()
     {
-        $module = Modules::where('name', $_POST['slug'])->where('version', $_POST['version'])->first();
+        $model = Modules::where('name', $_POST['slug'])->where('version', $_POST['version'])->first();
+        $data = ($_POST['type'] == 'core')
+            ? json_decode(ModulesHandler::dataCore())
+            : json_decode(ModulesHandler::getModule());
 
-        if (!isset($module)) {
-            ModulesHandler::write_to_db(json_decode(ModulesHandler::getModule()), 'INSERT');
-        } else {
+        if (!isset($model))
+            ModulesHandler::write_to_db($data, 'INSERT');
+        else {
+            $dir = ($_POST['type'] == 'core')
+                ? "cloud/core/" . $_POST['version']
+                : "cloud/modules/" . $_POST['slug'] . "/" . $_POST['version'];
             $mod = new Mod();
-            $mod->deleteDirectory("cloud/modules/" . $_POST['slug'] . "/" . $_POST['version']);
-            ModulesHandler::write_to_db(json_decode(ModulesHandler::getModule()), 'UPDATE');
+            $mod->deleteDirectory($dir);
+            ModulesHandler::write_to_db($data, 'UPDATE');
         }
     }
 

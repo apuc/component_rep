@@ -99,4 +99,30 @@ class ModulesHandler
 
         return $manifest;
     }
+
+    public static function dataCore()
+    {
+        $version = $_POST['version'];
+        $modulesPath = "cloud/core";
+
+        if (!file_exists("$modulesPath/$version"))
+            mkdir("$modulesPath/$version");
+        if (!file_exists("$modulesPath/$version/core"))
+            mkdir("$modulesPath/$version/core");
+
+        $file = base64_decode($_POST['file']);
+
+        file_put_contents(ROOT_DIR . "/$modulesPath/$version/core.zip", $file);
+
+        $cm = new CmService();
+        $cm->unpack("/$modulesPath/$version/core.zip", "/$modulesPath/$version/core", $version);
+
+        $manifest = file_get_contents(ROOT_DIR . "/$modulesPath/$version/core/manifest.json");
+        file_put_contents(ROOT_DIR . "/$modulesPath/$version/manifest.json", $manifest);
+
+        $mod = new Mod();
+        $mod->deleteDirectory(ROOT_DIR . "/$modulesPath/$version/core");
+
+        return $manifest;
+    }
 }
